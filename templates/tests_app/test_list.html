@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Доступные тесты</h1>
+<div class="test-container">
+    <ul>
+        {% for test in tests %}
+            <li class="test-item">
+                <h3>{{ test.title }}</h3>
+                <p>Предмет: {{ test.subject.name }}</p>
+                <p>Доступ с: {{ test.start_datetime }} по {{ test.end_datetime }}</p>
+                <a href="{% url 'test_detail' test.pk %}" class="btn">Пройти тест</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'enter_key' %}" class="btn">Ввести ключ доступа</a>
+</div>
+<style>
+    .test-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .test-item {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: white;
+    }
+    .test-item h3 {
+        margin: 0;
+        font-size: 1.5em;
+    }
+    .test-item p {
+        margin: 5px 0;
+        color: #666;
+    }
+    .btn {
+        display: inline-block;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+    }
+</style>
+{% endblock %}

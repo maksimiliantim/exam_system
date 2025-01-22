@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ test.title }}</h1>
+<p>Предмет: {{ test.subject.name }}</p>
+<p>Доступ с {{ test.start_datetime }} по {{ test.end_datetime }}</p>
+<p>Проходной балл: {{ test.passing_score }}</p>
+
+{% if is_available %}
+  <p>Тест доступен для прохождения.</p>
+  <a href="{% url 'start_test' test.pk %}">Начать тест</a>
+{% else %}
+  <p>Тест недоступен в данный момент.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Результаты теста: {{ test.title }}</h1>
+<p>Набранные баллы: {{ result.score }} из 100</p>
+{% if result.passed %}
+  <p>Поздравляем! Вы прошли тест.</p>
+{% else %}
+  <p>К сожалению, вы не набрали проходной балл.</p>
+{% endif %}
+{% endblock %}

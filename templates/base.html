@@ -1,0 +1,25 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Exam System</title>
+</head>
+<body>
+  <nav>
+    {% if user.is_authenticated %}
+      Привет, {{ user.username }}!
+      <a href="{% url 'logout' %}">Выйти</a>
+    {% else %}
+      <a href="{% url 'login' %}">Войти</a> |
+      <a href="{% url 'signup' %}">Регистрация</a>
+    {% endif %}
+    <a href="{% url 'test_list' %}">Список тестов</a>
+  </nav>
+  <hr>
+  <div>
+    {% block content %}
+    {% endblock %}
+  </div>
+</body>
+</html>

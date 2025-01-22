@@ -6,7 +6,7 @@ from . import views  # Импортируем views для использова�
 urlpatterns = [
     path('auth/', views.auth_view, name='auth_view'),  # Общая страница для входа и регистрации
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='auth_view'), name='logout'),  # Перенаправление на auth/
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('signup/', views.SignUpView.as_view(), name='signup'),  # Исправлено
 ]
 

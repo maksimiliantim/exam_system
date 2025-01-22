@@ -1,4 +1,3 @@
-# tests_app/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, FormView
 from django.urls import reverse
@@ -13,18 +12,15 @@ from django.contrib.auth.models import User
 
 def home_redirect(request):
     if not request.user.is_authenticated:
-        # Если пользователь не вошёл, перенаправляем на страницу логина
-        return redirect('login')  # Убедитесь, что маршрут логина указан в users_app.urls
+        return redirect('login') 
     else:
-        # Проверяем, является ли пользователь администратором
         if request.user.username == 'nol' and request.user.email == 'iojuga@mail.ru':
-            return redirect('/admin/')  # Перенаправляем в админку
+            return redirect('/admin/')  
         else:
-            # Все остальные пользователи считаются обычными
-            return redirect('user_dashboard')  # Панель пользователя
+            return redirect('user_dashboard')  
 
 def user_dashboard(request):
-    tests = Test.objects.all()  # Можно фильтровать только доступные тесты
+    tests = Test.objects.all()  
     return render(request, 'tests_app/user_dashboard.html', {'tests': tests})
 class TestListView(ListView):
     model = Test
@@ -32,7 +28,6 @@ class TestListView(ListView):
     context_object_name = 'tests'
 
     def get_queryset(self):
-        # Можно выводить только те тесты, у которых ещё не вышло время, и т.д.
         return Test.objects.all()
 
 class KeyForm(forms.Form):
@@ -65,16 +60,13 @@ class TestDetailView(DetailView):
 @login_required
 def start_test(request, pk):
     test_obj = get_object_or_404(Test, pk=pk)
-    # Проверяем, доступен ли тест по дате/времени
     if not test_obj.is_available_now():
         return render(request, 'tests_app/not_available.html', {"test": test_obj})
 
-    # Проверяем, не проходил ли пользователь уже тест (если не хотим давать повтор)
     existing_result = TestResult.objects.filter(user=request.user, test=test_obj).first()
     if existing_result:
         return redirect('test_result', pk=test_obj.pk)
 
-    # Создаём запись о начале теста
     result = TestResult.objects.create(
         user=request.user,
         test=test_obj,
@@ -87,14 +79,11 @@ def take_test(request, pk):
     test_obj = get_object_or_404(Test, pk=pk)
     result = TestResult.objects.filter(user=request.user, test=test_obj).first()
     if not result:
-        # Если пользователь не «начинал» тест, перенаправляем
         return redirect('start_test', pk=test_obj.pk)
 
-    # Получаем вопросы
     questions = test_obj.questions.all()
 
     if request.method == 'POST':
-        # Обрабатываем присланные ответы
         user_answers = request.POST
         score = 0
         total = questions.count()

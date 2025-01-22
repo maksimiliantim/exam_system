@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from .forms import SignUpForm  # Убедитесь, что SignUpForm определён
+from .forms import SignUpForm  
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.views import View

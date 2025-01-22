@@ -1,4 +1,3 @@
-# tests_app/admin.py
 from django.contrib import admin
 from .models import Subject, Test, Question, Answer, TestResult
 

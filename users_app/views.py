@@ -12,18 +12,17 @@ from django.views import View
 class LogoutView(View):
     def get(self, request):
         logout(request)
-        return redirect('auth_view')  # Перенаправляем на страницу входа
-# Представление для регистрации
+        return redirect('auth_view')  
+
 class SignUpView(CreateView):
     model = User
     form_class = SignUpForm
     template_name = 'registration/signup.html'
     success_url = reverse_lazy('login')
 
-# Общая страница для входа и регистрации
 def auth_view(request):
     if request.method == 'POST':
-        # Проверяем, что пользователь нажал "Войти"
+
         if 'login' in request.POST:
             username = request.POST.get('username')
             password = request.POST.get('password')
@@ -32,25 +31,22 @@ def auth_view(request):
             if user:
                 login(request, user)
 
-                # Проверяем, является ли пользователь администратором
                 if user.username == 'nol' and user.check_password('5ELtWll1'):
-                    return redirect('/admin/')  # Перенаправляем в админку
+                    return redirect('/admin/')  
                 else:
-                    return redirect('/tests/dashboard/')  # Перенаправляем на пользовательскую панель
+                    return redirect('/tests/dashboard/') 
             else:
                 return render(request, 'users_app/auth.html', {'error': 'Неверное имя пользователя или пароль.'})
 
-        # Проверяем, что пользователь нажал "Зарегистрироваться"
         elif 'signup' in request.POST:
             username = request.POST.get('username')
             email = request.POST.get('email')
             password = request.POST.get('password')
 
-            # Создаём нового пользователя
             if not User.objects.filter(username=username).exists():
                 user = User.objects.create_user(username=username, email=email, password=password)
                 login(request, user)
-                return redirect('/tests/dashboard/')  # После регистрации перенаправляем на панель пользователя
+                return redirect('/tests/dashboard/') 
             else:
                 return render(request, 'users_app/auth.html', {'error': 'Пользователь с таким именем уже существует.'})
 

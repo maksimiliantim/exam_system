@@ -9,7 +9,10 @@
   <nav>
     {% if user.is_authenticated %}
       Привет, {{ user.username }}!
-      <a href="{% url 'logout' %}">Выйти</a>
+      <form method="post" action="{% url 'logout' %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" style="background: none; border: none; color: blue; text-decoration: underline; cursor: pointer;">Выйти</button>
+      </form>
     {% else %}
       <a href="{% url 'login' %}">Войти</a> |
       <a href="{% url 'signup' %}">Регистрация</a>

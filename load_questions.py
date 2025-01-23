@@ -1,3 +1,10 @@
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'exam_system.settings')
+django.setup()
+
+from tests_app.models import Question, Test
 import csv
 from tests_app.models import Question, Test
 

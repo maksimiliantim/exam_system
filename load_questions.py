@@ -8,7 +8,7 @@ from tests_app.models import Question, Test
 import csv
 from tests_app.models import Question, Test
 
-test = Test.objects.get(title='Математика (1 семестр)')  
+test = Test.objects.get(title='Математика')  
 with open('math_questions.csv', encoding='utf-8') as file:
     reader = csv.DictReader(file)
     for row in reader:

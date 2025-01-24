@@ -83,7 +83,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+LOGOUT_REDIRECT_URL = '/auth/'
 LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'Europe/Moscow'

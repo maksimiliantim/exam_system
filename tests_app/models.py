@@ -68,6 +68,7 @@ class TestResult(models.Model):
     start_time = models.DateTimeField("Время начала теста", auto_now_add=True)
     end_time = models.DateTimeField("Время завершения теста", null=True, blank=True)
     passed = models.BooleanField("Пройден?", default=False)
+    user_answers = models.JSONField("Ответы пользователя", default=dict)
 
     def __str__(self):
         return f"{self.user.username} -> {self.test.title} : {self.score} баллов"

@@ -119,3 +119,20 @@ def test_result(request, pk):
         'test': test_obj,
         'result': result,
     })
+@login_required
+def test_review(request, pk):
+    test_obj = get_object_or_404(Test, pk=pk)
+    result = TestResult.objects.filter(user=request.user, test=test_obj).first()
+    if not result:
+        return redirect('start_test', pk=test_obj.pk)
+
+    questions = test_obj.questions.all()
+    user_answers = result.user_answers
+
+    context = {
+        'test': test_obj,
+        'result': result,
+        'questions': questions,
+        'user_answers': user_answers,
+    }
+    return render(request, 'tests_app/test_review.html', context)

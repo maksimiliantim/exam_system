@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load custom_filters %}
 {% block content %}
 <h2>Результаты теста: {{ test.title }}</h2>
 <p>Вы набрали {{ result.score }} баллов.</p>
@@ -14,23 +13,19 @@
     </tr>
   </thead>
   <tbody>
-    {% for question in questions %}
+    {% for item in questions_with_answers %}
       <tr>
-        <td>{{ question.text }}</td>
+        <td>{{ item.question.text }}</td>
         <td>
-          {% with user_answers|dictkey:question.id|stringformat:"s" as answer_id %}
-            {% if answer_id %}
-              {{ question.answers.get(id=answer_id).text }}
-            {% else %}
-              Не отвечено
-            {% endif %}
-          {% endwith %}
+          {% if item.user_answer %}
+            {{ item.user_answer.text }}
+          {% else %}
+            Не отвечено
+          {% endif %}
         </td>
         <td>
-          {% for answer in question.answers.all %}
-            {% if answer.is_correct %}
-              {{ answer.text }}
-            {% endif %}
+          {% for correct_answer in item.correct_answers %}
+            {{ correct_answer.text }}{% if not forloop.last %}, {% endif %}
           {% endfor %}
         </td>
       </tr>

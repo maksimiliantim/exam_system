@@ -4,10 +4,12 @@ from . import views  # Импортируем views для использова�
 from django.contrib.auth.views import LogoutView
 from .views import auth_view, SignUpView
 from .views import LogoutView
+from users_app.views import auth_view
 urlpatterns = [
-    path('auth/', views.auth_view, name='auth_view'),  # Общая страница для входа и регистрации
+    path('auth/', views.auth_view, name='auth_view'),  
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('signup/', views.SignUpView.as_view(), name='signup'),  # Исправлено
+    path('signup/', views.SignUpView.as_view(), name='signup'),
+    path('auth/', auth_view, name='auth'),
 ]
 

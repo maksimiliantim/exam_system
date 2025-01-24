@@ -10,6 +10,7 @@ urlpatterns = [
     path('test/<int:pk>/take/', views.take_test, name='take_test'),
     path('test/<int:pk>/result/', views.test_result, name='test_result'),
     path('test/<int:pk>/review/', views.test_review, name='test_review'),
+    path('auth/', auth_view, name='auth'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]
 

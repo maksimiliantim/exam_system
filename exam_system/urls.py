@@ -6,8 +6,9 @@ from tests_app.models import Test
 
 urlpatterns = [
     path('admin/', admin.site.urls),  # админка
-    path('', lambda request: redirect('auth_view')),  # перенаправление на auth/
-    path('', include('users_app.urls')),  # общая страница входа и регистрации
-    path('tests/', include('tests_app.urls')),  # тесты (пользовательская панель)
+    path('', lambda request: redirect('auth_view')),  
+    path('', include('users_app.urls')),  
+    path('tests/', include('tests_app.urls')),  
+    path('admin/tests_app/test/import/', ExportMixin, name='tests_app_test_import'),
 ]
 

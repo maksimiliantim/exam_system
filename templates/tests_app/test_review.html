@@ -1,36 +1,37 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block content %}
-<h2>Результаты теста: {{ test.title }}</h2>
-<p>Вы набрали {{ result.score }} баллов.</p>
-<p>Статус: {{ result.passed|yesno:"Пройден,Не пройден" }}</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Вопрос</th>
-      <th>Ваш ответ</th>
-      <th>Правильный ответ</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in questions_with_answers %}
-      <tr>
-        <td>{{ item.question.text }}</td>
-        <td>
-          {% if item.user_answer %}
-            {{ item.user_answer.text }}
+<div style="max-width: 1000px; margin: auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+  <h1 style="text-align: center; color: #333;">Обзор теста: {{ test.title }}</h1>
+  <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
+    <thead>
+      <tr style="background-color: #007bff; color: white; text-align: left;">
+        <th style="padding: 10px; border: 1px solid #ddd;">Вопрос</th>
+        <th style="padding: 10px; border: 1px solid #ddd;">Ваш ответ</th>
+        <th style="padding: 10px; border: 1px solid #ddd;">Правильный ответ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for question in questions_with_answers %}
+      <tr style="border: 1px solid #ddd;">
+        <td style="padding: 10px; border: 1px solid #ddd;">{{ question.question.text }}</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">
+          {% if question.user_answer %}
+            {{ question.user_answer.text }}
           {% else %}
-            Не отвечено
+            <span style="color: red;">Не отвечено</span>
           {% endif %}
         </td>
-        <td>
-          {% for correct_answer in item.correct_answers %}
-            {{ correct_answer.text }}{% if not forloop.last %}, {% endif %}
+        <td style="padding: 10px; border: 1px solid #ddd;">
+          {% for answer in question.correct_answers %}
+            {{ answer.text }}<br>
           {% endfor %}
         </td>
       </tr>
-    {% endfor %}
-  </tbody>
-</table>
-<a href="{% url 'test_list' %}">Вернуться к списку тестов</a>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div style="margin-top: 20px; text-align: center;">
+    <a href="{% url 'test_list' %}" style="display: inline-block; padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px;">Вернуться к тестам</a>
+  </div>
+</div>
 {% endblock %}

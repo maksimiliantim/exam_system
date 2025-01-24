@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Результаты теста: {{ test.title }}</h2>
+<p>Вы набрали {{ result.score }} баллов.</p>
+<p>Статус: {{ result.passed|yesno:"Пройден,Не пройден" }}</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Вопрос</th>
+      <th>Ваш ответ</th>
+      <th>Правильный ответ</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for question in questions %}
+      <tr>
+        <td>{{ question.text }}</td>
+        <td>
+          {% with user_answers|dictkey:question.id|stringformat:"s" as answer_id %}
+            {% if answer_id %}
+              {{ question.answers.get(id=answer_id).text }}
+            {% else %}
+              Не отвечено
+            {% endif %}
+          {% endwith %}
+        </td>
+        <td>
+          {% for answer in question.answers.all %}
+            {% if answer.is_correct %}
+              {{ answer.text }}
+            {% endif %}
+          {% endfor %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<a href="{% url 'test_list' %}">Вернуться к списку тестов</a>
+{% endblock %}

@@ -21,8 +21,12 @@ def home_redirect(request):
 
 def user_dashboard(request):
     results = TestResult.objects.filter(user=request.user, access_granted=True)
-    accessible_tests = [result.test for result in results]
-    return render(request, 'tests_app/user_dashboard.html', {'tests': accessible_tests})
+    granted_tests = [result.test.id for result in results]  # Список ID доступных тестов
+    tests = Test.objects.all()  # Все тесты
+    return render(request, 'tests_app/user_dashboard.html', {
+        'tests': tests,  # Полный список тестов
+        'granted_tests': granted_tests  # Тесты с доступом
+    })
 class TestListView(ListView):
     model = Test
     template_name = 'tests_app/test_list.html'

@@ -36,7 +36,26 @@ class KeyForm(forms.Form):
 class EnterKeyView(FormView):
     template_name = 'tests_app/enter_key.html'
     form_class = KeyForm
+class TestResult(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Пользователь"
+    )
+    test = models.ForeignKey(
+        Test,
+        on_delete=models.CASCADE,
+        verbose_name="Тест"
+    )
+    score = models.PositiveIntegerField("Набранные баллы", default=0)
+    start_time = models.DateTimeField("Время начала теста", auto_now_add=True)
+    end_time = models.DateTimeField("Время завершения теста", null=True, blank=True)
+    passed = models.BooleanField("Пройден?", default=False)
+    user_answers = models.JSONField("Ответы пользователя", default=dict)
+    access_granted = models.BooleanField("Доступ разрешен", default=False)  
 
+    def __str__(self):
+        return f"{self.user.username} -> {self.test.title} : {self.score} баллов"
     def form_valid(self, form):
         access_key = form.cleaned_data['access_key']
         try:

@@ -4,11 +4,10 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django import forms
 from django.utils import timezone
-from .models import Test, TestResult, Question, Answer
-from django.shortcuts import render
-from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+
+from .models import Test, TestResult, Question, Answer
+
 
 def home_redirect(request):
     if not request.user.is_authenticated:
@@ -19,15 +18,20 @@ def home_redirect(request):
         else:
             return redirect('user_dashboard')  
 
+
 def user_dashboard(request):
+    """Личный кабинет пользователя: список всех тестов и тех, к которым получен доступ."""
     results = TestResult.objects.filter(user=request.user, access_granted=True)
-    granted_tests = [result.test.id for result in results]  # Список ID доступных тестов
+    granted_tests = [result.test.id for result in results]  # Список ID тестов с доступом
     tests = Test.objects.all()  # Все тесты
     return render(request, 'tests_app/user_dashboard.html', {
-        'tests': tests,  # Полный список тестов
-        'granted_tests': granted_tests  # Тесты с доступом
+        'tests': tests,  
+        'granted_tests': granted_tests 
     })
+
+
 class TestListView(ListView):
+    """Страница со списком тестов (все тесты)."""
     model = Test
     template_name = 'tests_app/test_list.html'
     context_object_name = 'tests'
@@ -35,10 +39,14 @@ class TestListView(ListView):
     def get_queryset(self):
         return Test.objects.all()
 
+
 class KeyForm(forms.Form):
+    """Форма для ввода ключа доступа."""
     access_key = forms.CharField(label="Ключ доступа", max_length=50)
 
+
 class EnterKeyView(FormView):
+    """Обработка формы ввода ключа доступа к тесту."""
     template_name = 'tests_app/enter_key.html'
     form_class = KeyForm
 
@@ -47,43 +55,20 @@ class EnterKeyView(FormView):
         try:
             test = Test.objects.get(access_key=access_key)
             # Создаем или обновляем запись TestResult
-            result, created = TestResult.objects.get_or_create(user=self.request.user, test=test)
+            result, created = TestResult.objects.get_or_create(
+                user=self.request.user,
+                test=test
+            )
             result.access_granted = True
             result.save()
             return redirect('test_detail', pk=test.pk)
         except Test.DoesNotExist:
             form.add_error('access_key', 'Неверный ключ доступа')
             return self.form_invalid(form)
-class TestResult(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name="Пользователь"
-    )
-    test = models.ForeignKey(
-        Test,
-        on_delete=models.CASCADE,
-        verbose_name="Тест"
-    )
-    score = models.PositiveIntegerField("Набранные баллы", default=0)
-    start_time = models.DateTimeField("Время начала теста", auto_now_add=True)
-    end_time = models.DateTimeField("Время завершения теста", null=True, blank=True)
-    passed = models.BooleanField("Пройден?", default=False)
-    user_answers = models.JSONField("Ответы пользователя", default=dict)
-    access_granted = models.BooleanField("Доступ разрешен", default=False)  
 
-    def __str__(self):
-        return f"{self.user.username} -> {self.test.title} : {self.score} баллов"
-    def form_valid(self, form):
-        access_key = form.cleaned_data['access_key']
-        try:
-            test = Test.objects.get(access_key=access_key)
-            return redirect('test_detail', pk=test.pk)
-        except Test.DoesNotExist:
-            form.add_error('access_key', 'Неверный ключ доступа')
-            return self.form_invalid(form)
 
 class TestDetailView(DetailView):
+    """Детальная страница теста (описание, доступность и т.д.)."""
     model = Test
     template_name = 'tests_app/test_detail.html'
     context_object_name = 'test'
@@ -94,11 +79,16 @@ class TestDetailView(DetailView):
         context['is_available'] = test_obj.is_available_now()
         return context
 
+
 @login_required
 def start_test(request, pk):
+    """
+    Начало теста: проверка доступности по времени и наличия доступа (access_granted).
+    Если всё в порядке — создаётся TestResult и переадресуем на страницу прохождения.
+    """
     test_obj = get_object_or_404(Test, pk=pk)
 
-    # Проверяем, доступен ли тест
+    # Проверка, доступен ли тест по датам
     if not test_obj.is_available_now():
         return render(request, 'tests_app/not_available.html', {"test": test_obj})
 
@@ -116,15 +106,19 @@ def start_test(request, pk):
         user=request.user,
         test=test_obj,
         start_time=timezone.now(),
-        access_granted=True  # Предполагаем, что ключ уже введен
+        access_granted=True  # Считаем, что пользователь уже ввёл ключ доступа
     )
     return redirect('take_test', pk=test_obj.pk)
 
+
 @login_required
 def take_test(request, pk):
+    """Прохождение теста: отображение вопросов и обработка ответов."""
     test_obj = get_object_or_404(Test, pk=pk)
     result = TestResult.objects.filter(user=request.user, test=test_obj).first()
+    
     if not result:
+        # Если почему-то результат не существует, сначала начинаем тест
         return redirect('start_test', pk=test_obj.pk)
 
     questions = test_obj.questions.all()
@@ -145,7 +139,7 @@ def take_test(request, pk):
         result.score = final_score
         result.end_time = timezone.now()
         result.passed = (final_score >= test_obj.passing_score)
-        result.user_answers = user_answers  
+        result.user_answers = user_answers
         result.save()
 
         return redirect('test_result', pk=test_obj.pk)
@@ -154,8 +148,11 @@ def take_test(request, pk):
         'test': test_obj,
         'questions': questions,
     })
+
+
 @login_required
 def test_result(request, pk):
+    """Страница результата теста."""
     test_obj = get_object_or_404(Test, pk=pk)
     result = TestResult.objects.filter(user=request.user, test=test_obj).first()
     if not result:
@@ -165,12 +162,14 @@ def test_result(request, pk):
         'test': test_obj,
         'result': result,
     })
+
+
 @login_required
 def test_review(request, pk):
+    """Просмотр теста после прохождения: правильные ответы и ответы пользователя."""
     test = get_object_or_404(Test, id=pk)
     result = get_object_or_404(TestResult, test=test, user=request.user)
 
-    # Подготовка данных для шаблона
     questions = test.questions.all()
     user_answers = result.user_answers or {}
 

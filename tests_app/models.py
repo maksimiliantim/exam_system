@@ -4,8 +4,6 @@ from django.views.generic import ListView, FormView
 from django.shortcuts import redirect
 from django.utils import timezone
 
-# Если KeyForm у вас определён в другом месте, нужно скорректировать импорт.
-# from .forms import KeyForm  # Пример, как можно импортировать, если форма в forms.py или другом месте
 
 class Subject(models.Model):
     name = models.CharField("Название предмета", max_length=100)
@@ -19,13 +17,11 @@ class TestListView(ListView):
     Класс-вьюха для отображения списка тестов, доступных конкретному пользователю.
     Обычно вьюхи располагают в файле views.py, но здесь оставим в models.py, как у вас в примере.
     """
-    model = 'Test'  # Можно передавать строкой, если класс Test описан ниже
+    model = 'Test'  
     template_name = 'tests_app/test_list.html'
     context_object_name = 'tests'
 
     def get_queryset(self):
-        # Импортируем модель Test и TestResult внутри метода, 
-        # чтобы избежать ошибок, связанных с порядком объявлений
         from .models import Test, TestResult
 
         user = self.request.user

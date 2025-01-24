@@ -84,22 +84,22 @@ def take_test(request, pk):
     questions = test_obj.questions.all()
 
     if request.method == 'POST':
-        user_answers = request.POST
+        user_answers = {}
         score = 0
         total = questions.count()
 
         for question in questions:
             correct_ids = question.answers.filter(is_correct=True).values_list('id', flat=True)
-            selected_id = user_answers.get(f"question_{question.id}")
-            if selected_id:
-                selected_id = int(selected_id)
-                if selected_id in correct_ids:
-                    score += 1
+            selected_id = request.POST.get(f"question_{question.id}")
+            user_answers[str(question.id)] = selected_id
+            if selected_id and int(selected_id) in correct_ids:
+                score += 1
 
         final_score = int((score / total) * 100)
         result.score = final_score
         result.end_time = timezone.now()
         result.passed = (final_score >= test_obj.passing_score)
+        result.user_answers = user_answers  # Сохраняем ответы пользователя
         result.save()
 
         return redirect('test_result', pk=test_obj.pk)
@@ -108,7 +108,6 @@ def take_test(request, pk):
         'test': test_obj,
         'questions': questions,
     })
-
 @login_required
 def test_result(request, pk):
     test_obj = get_object_or_404(Test, pk=pk)

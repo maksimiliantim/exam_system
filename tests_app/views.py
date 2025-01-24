@@ -1,5 +1,5 @@
 from django.views.generic import ListView, FormView
-
+from .models import Test, TestResult, Question, Answer
 class TestListView(ListView):
     model = Test
     template_name = 'tests_app/test_list.html'

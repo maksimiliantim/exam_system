@@ -36,6 +36,19 @@ class KeyForm(forms.Form):
 class EnterKeyView(FormView):
     template_name = 'tests_app/enter_key.html'
     form_class = KeyForm
+
+    def form_valid(self, form):
+        access_key = form.cleaned_data['access_key']
+        try:
+            test = Test.objects.get(access_key=access_key)
+            # Создаем или обновляем запись TestResult
+            result, created = TestResult.objects.get_or_create(user=self.request.user, test=test)
+            result.access_granted = True
+            result.save()
+            return redirect('test_detail', pk=test.pk)
+        except Test.DoesNotExist:
+            form.add_error('access_key', 'Неверный ключ доступа')
+            return self.form_invalid(form)
 class TestResult(models.Model):
     user = models.ForeignKey(
         User,
@@ -79,17 +92,26 @@ class TestDetailView(DetailView):
 @login_required
 def start_test(request, pk):
     test_obj = get_object_or_404(Test, pk=pk)
+
+    # Проверяем, доступен ли тест
     if not test_obj.is_available_now():
         return render(request, 'tests_app/not_available.html', {"test": test_obj})
 
-    existing_result = TestResult.objects.filter(user=request.user, test=test_obj).first()
-    if existing_result:
+    # Проверяем, есть ли у пользователя доступ к тесту
+    result = TestResult.objects.filter(user=request.user, test=test_obj).first()
+    if result and not result.access_granted:
+        return redirect('enter_key')  # Перенаправляем на ввод ключа
+
+    # Если результат уже существует, перенаправляем к результату
+    if result:
         return redirect('test_result', pk=test_obj.pk)
 
+    # Создаем запись о начале теста
     result = TestResult.objects.create(
         user=request.user,
         test=test_obj,
-        start_time=timezone.now()
+        start_time=timezone.now(),
+        access_granted=True  # Предполагаем, что ключ уже введен
     )
     return redirect('take_test', pk=test_obj.pk)
 

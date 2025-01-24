@@ -1,14 +1,99 @@
-{% extends 'base.html' %}
-{% block content %}
-<h1>{{ test.title }}</h1>
-<p>Предмет: {{ test.subject.name }}</p>
-<p>Доступ с {{ test.start_datetime }} по {{ test.end_datetime }}</p>
-<p>Проходной балл: {{ test.passing_score }}</p>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест: {{ test.title }}</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
 
-{% if is_available %}
-  <p>Тест доступен для прохождения.</p>
-  <a href="{% url 'start_test' test.pk %}">Начать тест</a>
-{% else %}
-  <p>Тест недоступен в данный момент.</p>
-{% endif %}
-{% endblock %}
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        main {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            max-width: 800px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1, h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 1rem;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            color: white;
+            background-color: #007bff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .info-box {
+            background-color: #f9f9f9;
+            border-left: 5px solid #007bff;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box span {
+            font-weight: bold;
+        }
+
+        .test-action {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        {{ test.title }}
+    </header>
+    <main>
+        <h1>Тест: {{ test.title }}</h1>
+        <div class="info-box">
+            <p><span>Предмет:</span> {{ test.subject.name }}</p>
+            <p><span>Доступ:</span> {{ test.start_datetime|date:"d.m.Y H:i" }} - {{ test.end_datetime|date:"d.m.Y H:i" }}</p>
+            <p><span>Проходной балл:</span> {{ test.passing_score }}</p>
+        </div>
+        {% if test.is_available_now %}
+            <p style="color: green; font-weight: bold;">Тест доступен для прохождения.</p>
+            <div class="test-action">
+                <a href="{% url 'start_test' test.pk %}" class="btn">Начать тест</a>
+            </div>
+        {% else %}
+            <p style="color: red; font-weight: bold;">Тест недоступен в данный момент.</p>
+        {% endif %}
+        <div style="margin-top: 20px;">
+            <a href="{% url 'test_list' %}" class="btn" style="background-color: #6c757d;">Список тестов</a>
+        </div>
+    </main>
+</body>
+</html>

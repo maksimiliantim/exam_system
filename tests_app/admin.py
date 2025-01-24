@@ -1,6 +1,6 @@
 from django.contrib import admin
 from import_export.admin import ExportMixin
-from .models import Test, Question, Answer, TestResult
+from .models import Test, Question, Answer, TestResult, Subject
 
 @admin.register(Test)
 class TestAdmin(ExportMixin, admin.ModelAdmin):
@@ -21,8 +21,4 @@ class AnswerAdmin(ExportMixin, admin.ModelAdmin):
 class TestResultAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ('user', 'test', 'score', 'passed')
     search_fields = ('user__username', 'test__title')
-
-
-admin.site.register(Test)
 admin.site.register(Subject)
-admin.site.register(TestResult)

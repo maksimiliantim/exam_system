@@ -69,7 +69,11 @@
                 <td>{{ test.subject.name }}</td>
                 <td>{{ test.start_datetime|date:"d.m.Y H:i" }} - {{ test.end_datetime|date:"d.m.Y H:i" }}</td>
                 <td>
-                    <a href="{% url 'test_detail' test.pk %}">Пройти тест</a>
+                    {% if test.id in granted_tests %}
+                        <a href="{% url 'test_detail' test.pk %}" style="color: green; font-weight: bold;">Доступен</a>
+                    {% else %}
+                        <a href="{% url 'enter_key' %}" style="color: red; font-weight: bold;">Введите ключ</a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

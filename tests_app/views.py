@@ -120,11 +120,11 @@ def test_result(request, pk):
         'result': result,
     })
 @login_required
-def test_review(request, test_id):
-    test = get_object_or_404(Test, id=test_id)
+def test_review(request, pk):
+    test = get_object_or_404(Test, id=pk)
     result = get_object_or_404(TestResult, test=test, user=request.user)
 
-    # Подготовим данные для шаблона
+    # Подготовка данных для шаблона
     questions = test.questions.all()
     user_answers = result.user_answers or {}
 

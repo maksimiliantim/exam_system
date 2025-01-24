@@ -1,12 +1,18 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Результаты теста: {{ test.title }}</h1>
-<p>Набранные баллы: {{ result.score }} из 100</p>
-{% if result.passed %}
-  <p>Поздравляем! Вы прошли тест.</p>
-{% else %}
-  <p>К сожалению, вы не набрали проходной балл.</p>
-{% endif %}
-
-<a href="{% url 'test_review' test.pk %}">Посмотреть вопросы и ответы</a>
+<div style="max-width: 800px; margin: auto; padding: 20px; background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+  <h1 style="text-align: center; color: #333;">Результаты теста: {{ test.title }}</h1>
+  <div style="margin-top: 20px; line-height: 1.6;">
+    <p><strong>Вы набрали:</strong> {{ result.score }} баллов</p>
+    <p><strong>Статус:</strong> 
+      <span style="color: {{ result.passed|yesno:'#28a745,#dc3545' }}; font-weight: bold;">
+        {{ result.passed|yesno:"Пройден,Не пройден" }}
+      </span>
+    </p>
+  </div>
+  <div style="margin-top: 20px; text-align: center;">
+    <a href="{% url 'test_review' test.id %}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Посмотреть ответы</a>
+    <a href="{% url 'test_list' %}" style="display: inline-block; padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px; margin-left: 10px;">Вернуться к тестам</a>
+  </div>
+</div>
 {% endblock %}

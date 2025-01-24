@@ -11,5 +11,6 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('signup/', views.SignUpView.as_view(), name='signup'),
     path('auth/', auth_view, name='auth'),
+    path('admin/tests_app/test/import/', ExportMixin, name='tests_app_test_import'),
 ]
 

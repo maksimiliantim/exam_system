@@ -5,7 +5,7 @@ class Subject(models.Model):
     name = models.CharField("Название предмета", max_length=100)
 
     def __str__(self):
-        return self.name
+        return f"{self.user.username} -> {self.test.title} : {self.score} баллов"
 class TestListView(ListView):
     model = Test
     template_name = 'tests_app/test_list.html'

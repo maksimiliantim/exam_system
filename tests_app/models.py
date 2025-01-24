@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils import timezone
 
 class Subject(models.Model):
     name = models.CharField("Название предмета", max_length=100)
@@ -25,6 +24,7 @@ class Test(models.Model):
         return f"{self.title} ({self.subject})"
 
     def is_available_now(self):
+        from django.utils import timezone
         now = timezone.now()
         return self.start_datetime <= now <= self.end_datetime
 

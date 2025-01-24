@@ -120,19 +120,28 @@ def test_result(request, pk):
         'result': result,
     })
 @login_required
-def test_review(request, pk):
-    test_obj = get_object_or_404(Test, pk=pk)
-    result = TestResult.objects.filter(user=request.user, test=test_obj).first()
-    if not result:
-        return redirect('start_test', pk=test_obj.pk)
+def test_review(request, test_id):
+    test = get_object_or_404(Test, id=test_id)
+    result = get_object_or_404(TestResult, test=test, user=request.user)
 
-    questions = test_obj.questions.all()
-    user_answers = result.user_answers
+    # Подготовим данные для шаблона
+    questions = test.questions.all()
+    user_answers = result.user_answers or {}
+
+    questions_with_answers = []
+    for question in questions:
+        user_answer_id = user_answers.get(str(question.id))
+        user_answer = Answer.objects.filter(id=user_answer_id).first()
+        correct_answers = question.answers.filter(is_correct=True)
+        questions_with_answers.append({
+            "question": question,
+            "user_answer": user_answer,
+            "correct_answers": correct_answers,
+        })
 
     context = {
-        'test': test_obj,
-        'result': result,
-        'questions': questions,
-        'user_answers': user_answers,
+        "test": test,
+        "result": result,
+        "questions_with_answers": questions_with_answers,
     }
-    return render(request, 'tests_app/test_review.html', context)
+    return render(request, "tests_app/test_review.html", context)

@@ -99,7 +99,7 @@ def take_test(request, pk):
         result.score = final_score
         result.end_time = timezone.now()
         result.passed = (final_score >= test_obj.passing_score)
-        result.user_answers = user_answers  # Сохраняем ответы пользователя
+        result.user_answers = user_answers  
         result.save()
 
         return redirect('test_result', pk=test_obj.pk)

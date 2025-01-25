@@ -79,8 +79,10 @@ class TestDetailView(DetailView):
         return context
 
 @login_required
-@login_required
 def start_test(request, pk):
+    """
+    Начало теста: проверка доступности по времени и наличия ключа доступа.
+    """
     test_obj = get_object_or_404(Test, pk=pk)
 
     if not test_obj.is_available_now():
@@ -107,9 +109,9 @@ def take_test(request, pk):
     """Прохождение теста: отображение вопросов и обработка ответов."""
     test_obj = get_object_or_404(Test, pk=pk)
     result = TestResult.objects.filter(user=request.user, test=test_obj).first()
-    
-    if not result:
-        return redirect('start_test', pk=test_obj.pk)
+
+    if not result or not result.access_granted:
+        return redirect('enter_key') 
 
     questions = test_obj.questions.all()
 
@@ -145,8 +147,9 @@ def test_result(request, pk):
     """Страница результата теста."""
     test_obj = get_object_or_404(Test, pk=pk)
     result = TestResult.objects.filter(user=request.user, test=test_obj).first()
-    if not result:
-        return redirect('start_test', pk=test_obj.pk)
+
+    if not result or not result.access_granted:
+        return redirect('enter_key')
 
     return render(request, 'tests_app/test_result.html', {
         'test': test_obj,
@@ -155,11 +158,12 @@ def test_result(request, pk):
 
 @login_required
 def test_review(request, pk):
+    """Просмотр теста после прохождения: правильные ответы и ответы пользователя."""
     test = get_object_or_404(Test, id=pk)
-    result = TestResult.objects.filter(test=test, user=request.user).first()
+    result = get_object_or_404(TestResult, test=test, user=request.user)
 
     if not result or not result.access_granted or not result.end_time:
-        return redirect('test_detail', pk=test.pk)  
+        return redirect('test_detail', pk=test.pk)
 
     questions = test.questions.all()
     user_answers = result.user_answers or {}

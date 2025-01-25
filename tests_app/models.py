@@ -39,22 +39,20 @@ class EnterKeyView(FormView):
     Обычно хранится в views.py, но здесь для примера остаётся в models.py.
     """
     template_name = 'tests_app/enter_key.html'
-    form_class = None  # <-- тут нужно указать вашу форму, напр. KeyForm
+    form_class = None  
 
     def form_valid(self, form):
-        # Импортируем Test, TestResult внутри метода, чтобы избежать проблем порядка объявлений
         from .models import Test, TestResult
 
         access_key = form.cleaned_data['access_key']
         user = self.request.user
         try:
             test = Test.objects.get(access_key=access_key)
-            # Проверяем, есть ли уже запись для данного теста
             result, created = TestResult.objects.get_or_create(user=user, test=test)
             if not result.access_granted:
                 result.access_granted = True
                 result.save()
-            return redirect('test_list')  # Перенаправление к списку тестов
+            return redirect('test_list')
         except Test.DoesNotExist:
             form.add_error('access_key', 'Неверный ключ доступа')
             return self.form_invalid(form)

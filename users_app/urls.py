@@ -1,6 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from . import views  # Импортируем views для использования auth_view
+from . import views  
 from django.contrib.auth.views import LogoutView
 from .views import auth_view, SignUpView
 from .views import LogoutView

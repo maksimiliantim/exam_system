@@ -22,7 +22,7 @@ def home_redirect(request):
 def user_dashboard(request):
     """Личный кабинет пользователя: список всех тестов и тех, к которым получен доступ."""
     results = TestResult.objects.filter(user=request.user, access_granted=True)
-    granted_tests = [result.test.id for result in results]  # Список ID тестов с доступом
+    granted_tests = [result.test.id for result in results]  
     tests = Test.objects.all()  # Все тесты
     return render(request, 'tests_app/user_dashboard.html', {
         'tests': tests,  
@@ -54,7 +54,6 @@ class EnterKeyView(FormView):
         access_key = form.cleaned_data['access_key']
         try:
             test = Test.objects.get(access_key=access_key)
-            # Создаем или обновляем запись TestResult
             result, created = TestResult.objects.get_or_create(
                 user=self.request.user,
                 test=test
@@ -84,20 +83,16 @@ class TestDetailView(DetailView):
 def start_test(request, pk):
     test_obj = get_object_or_404(Test, pk=pk)
 
-    # Проверка, доступен ли тест по датам
     if not test_obj.is_available_now():
         return render(request, 'tests_app/not_available.html', {"test": test_obj})
 
-    # Проверяем, есть ли у пользователя доступ к тесту
     result = TestResult.objects.filter(user=request.user, test=test_obj).first()
     if not result or not result.access_granted:
-        return redirect('enter_key')  # Перенаправляем на ввод ключа
+        return redirect('enter_key')  
 
-    # Если результат уже существует, перенаправляем на прохождение теста
     if result and result.end_time is None:
         return redirect('take_test', pk=test_obj.pk)
 
-    # Создаем запись о начале теста
     result = TestResult.objects.create(
         user=request.user,
         test=test_obj,
@@ -114,7 +109,6 @@ def take_test(request, pk):
     result = TestResult.objects.filter(user=request.user, test=test_obj).first()
     
     if not result:
-        # Если почему-то результат не существует, сначала начинаем тест
         return redirect('start_test', pk=test_obj.pk)
 
     questions = test_obj.questions.all()
@@ -159,16 +153,13 @@ def test_result(request, pk):
         'result': result,
     })
 
-
-@login_required
 @login_required
 def test_review(request, pk):
     test = get_object_or_404(Test, id=pk)
-    result = get_object_or_404(TestResult, test=test, user=request.user)
+    result = TestResult.objects.filter(test=test, user=request.user).first()
 
-    if not result.end_time:
-        # Если тест не завершен, перенаправляем на прохождение
-        return redirect('take_test', pk=test.pk)
+    if not result or not result.access_granted or not result.end_time:
+        return redirect('test_detail', pk=test.pk)  
 
     questions = test.questions.all()
     user_answers = result.user_answers or {}

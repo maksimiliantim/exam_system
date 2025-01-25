@@ -79,35 +79,28 @@ class TestDetailView(DetailView):
         context['is_available'] = test_obj.is_available_now()
         return context
 
-
 @login_required
 def start_test(request, pk):
-    """
-    Начало теста: проверка доступности по времени и наличия доступа (access_granted).
-    Если всё в порядке — создаётся TestResult и переадресуем на страницу прохождения.
-    """
     test_obj = get_object_or_404(Test, pk=pk)
 
-    # Проверка, доступен ли тест по датам
     if not test_obj.is_available_now():
         return render(request, 'tests_app/not_available.html', {"test": test_obj})
 
-    # Проверяем, есть ли у пользователя доступ к тесту
     result = TestResult.objects.filter(user=request.user, test=test_obj).first()
-    if result and not result.access_granted:
-        return redirect('enter_key')  # Перенаправляем на ввод ключа
 
-    # Если результат уже существует, перенаправляем к результату
-    if result:
+    if result and result.end_time:
+        # Если тест завершен, показываем результат
         return redirect('test_result', pk=test_obj.pk)
 
-    # Создаем запись о начале теста
-    result = TestResult.objects.create(
-        user=request.user,
-        test=test_obj,
-        start_time=timezone.now(),
-        access_granted=True  # Считаем, что пользователь уже ввёл ключ доступа
-    )
+    if not result:
+        # Если результат не существует, создаем его
+        result = TestResult.objects.create(
+            user=request.user,
+            test=test_obj,
+            start_time=timezone.now(),
+            access_granted=True
+        )
+    
     return redirect('take_test', pk=test_obj.pk)
 
 
@@ -165,10 +158,14 @@ def test_result(request, pk):
 
 
 @login_required
+@login_required
 def test_review(request, pk):
-    """Просмотр теста после прохождения: правильные ответы и ответы пользователя."""
     test = get_object_or_404(Test, id=pk)
     result = get_object_or_404(TestResult, test=test, user=request.user)
+
+    if not result.end_time:
+        # Если тест не завершен, перенаправляем на прохождение
+        return redirect('take_test', pk=test.pk)
 
     questions = test.questions.all()
     user_answers = result.user_answers or {}

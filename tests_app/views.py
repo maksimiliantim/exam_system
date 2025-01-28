@@ -5,9 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django import forms
 from django.utils import timezone
 from django.contrib.auth.models import User
-
 from .models import Test, TestResult, Question, Answer
-
 
 def home_redirect(request):
     if not request.user.is_authenticated:
@@ -18,7 +16,6 @@ def home_redirect(request):
         else:
             return redirect('user_dashboard')  
 
-
 def user_dashboard(request):
     results = TestResult.objects.filter(user=request.user, access_granted=True)
     granted_tests = [result.test.id for result in results]  
@@ -28,7 +25,6 @@ def user_dashboard(request):
         'granted_tests': granted_tests
     })
 
-
 class TestListView(ListView):
     model = Test
     template_name = 'tests_app/test_list.html'
@@ -37,10 +33,8 @@ class TestListView(ListView):
     def get_queryset(self):
         return Test.objects.all()
 
-
 class KeyForm(forms.Form):
     access_key = forms.CharField(label="Ключ доступа", max_length=50)
-
 
 class EnterKeyView(FormView):
     template_name = 'tests_app/enter_key.html'
@@ -61,7 +55,6 @@ class EnterKeyView(FormView):
             form.add_error('access_key', 'Неверный ключ доступа')
             return self.form_invalid(form)
 
-
 class TestDetailView(DetailView):
     model = Test
     template_name = 'tests_app/test_detail.html'
@@ -72,7 +65,6 @@ class TestDetailView(DetailView):
         test_obj = self.object
         context['is_available'] = test_obj.is_available_now()
         return context
-
 
 @login_required
 def start_test(request, pk):
@@ -95,7 +87,6 @@ def start_test(request, pk):
         access_granted=True
     )
     return redirect('take_test', pk=test_obj.pk)
-
 
 @login_required
 def take_test(request, pk):
@@ -133,7 +124,6 @@ def take_test(request, pk):
         'questions': questions,
     })
 
-
 @login_required
 def test_result(request, pk):
     test_obj = get_object_or_404(Test, pk=pk)
@@ -146,7 +136,6 @@ def test_result(request, pk):
         'test': test_obj,
         'result': result,
     })
-
 
 @login_required
 def test_review(request, pk):

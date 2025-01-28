@@ -1,62 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.views.generic import ListView, FormView
-from django.shortcuts import redirect
 from django.utils import timezone
-
 
 class Subject(models.Model):
     name = models.CharField("Название предмета", max_length=100)
 
     def __str__(self):
         return self.name
-
-
-class TestListView(ListView):
-    """
-    Класс-вьюха для отображения списка тестов, доступных конкретному пользователю.
-    Обычно вьюхи располагают в файле views.py, но здесь оставим в models.py, как у вас в примере.
-    """
-    model = 'Test'  
-    template_name = 'tests_app/test_list.html'
-    context_object_name = 'tests'
-
-    def get_queryset(self):
-        from .models import Test, TestResult
-
-        user = self.request.user
-        granted_tests = TestResult.objects.filter(
-            user=user, 
-            access_granted=True
-        ).values_list('test', flat=True)
-
-        return Test.objects.filter(id__in=granted_tests)
-
-
-class EnterKeyView(FormView):
-    """
-    Вьюха для обработки ввода ключа доступа к тесту.
-    Обычно хранится в views.py, но здесь для примера остаётся в models.py.
-    """
-    template_name = 'tests_app/enter_key.html'
-    form_class = None  
-
-    def form_valid(self, form):
-        from .models import Test, TestResult
-
-        access_key = form.cleaned_data['access_key']
-        user = self.request.user
-        try:
-            test = Test.objects.get(access_key=access_key)
-            result, created = TestResult.objects.get_or_create(user=user, test=test)
-            if not result.access_granted:
-                result.access_granted = True
-                result.save()
-            return redirect('test_list')
-        except Test.DoesNotExist:
-            form.add_error('access_key', 'Неверный ключ доступа')
-            return self.form_invalid(form)
-
 
 class Test(models.Model):
     subject = models.ForeignKey(
@@ -78,7 +28,6 @@ class Test(models.Model):
         now = timezone.now()
         return self.start_datetime <= now <= self.end_datetime
 
-
 class Question(models.Model):
     test = models.ForeignKey(
         Test,
@@ -90,7 +39,6 @@ class Question(models.Model):
 
     def __str__(self):
         return f"Вопрос: {self.text[:50]}..."
-
 
 class Answer(models.Model):
     question = models.ForeignKey(
@@ -104,7 +52,6 @@ class Answer(models.Model):
 
     def __str__(self):
         return f"Ответ: {self.text[:50]}..."
-
 
 class TestResult(models.Model):
     user = models.ForeignKey(
@@ -123,6 +70,9 @@ class TestResult(models.Model):
     passed = models.BooleanField("Пройден?", default=False)
     user_answers = models.JSONField("Ответы пользователя", default=dict)
     access_granted = models.BooleanField("Доступ разрешен", default=False)
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.test.title} ({self.score} баллов)"
 
     def __str__(self):
         return f"{self.user.username} -> {self.test.title} ({self.score} баллов)"

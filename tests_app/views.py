@@ -20,18 +20,16 @@ def home_redirect(request):
 
 
 def user_dashboard(request):
-    """Личный кабинет пользователя: список всех тестов и тех, к которым получен доступ."""
     results = TestResult.objects.filter(user=request.user, access_granted=True)
     granted_tests = [result.test.id for result in results]  
     tests = Test.objects.all()  # Все тесты
     return render(request, 'tests_app/user_dashboard.html', {
-        'tests': tests,  
-        'granted_tests': granted_tests 
+        'tests': tests,
+        'granted_tests': granted_tests
     })
 
 
 class TestListView(ListView):
-    """Страница со списком тестов (все тесты)."""
     model = Test
     template_name = 'tests_app/test_list.html'
     context_object_name = 'tests'
@@ -41,12 +39,10 @@ class TestListView(ListView):
 
 
 class KeyForm(forms.Form):
-    """Форма для ввода ключа доступа."""
     access_key = forms.CharField(label="Ключ доступа", max_length=50)
 
 
 class EnterKeyView(FormView):
-    """Обработка формы ввода ключа доступа к тесту."""
     template_name = 'tests_app/enter_key.html'
     form_class = KeyForm
 
@@ -67,7 +63,6 @@ class EnterKeyView(FormView):
 
 
 class TestDetailView(DetailView):
-    """Детальная страница теста (описание, доступность и т.д.)."""
     model = Test
     template_name = 'tests_app/test_detail.html'
     context_object_name = 'test'
@@ -78,11 +73,9 @@ class TestDetailView(DetailView):
         context['is_available'] = test_obj.is_available_now()
         return context
 
+
 @login_required
 def start_test(request, pk):
-    """
-    Начало теста: проверка доступности по времени и наличия ключа доступа.
-    """
     test_obj = get_object_or_404(Test, pk=pk)
 
     if not test_obj.is_available_now():
@@ -90,7 +83,7 @@ def start_test(request, pk):
 
     result = TestResult.objects.filter(user=request.user, test=test_obj).first()
     if not result or not result.access_granted:
-        return redirect('enter_key')  
+        return redirect('enter_key')
 
     if result and result.end_time is None:
         return redirect('take_test', pk=test_obj.pk)
@@ -106,12 +99,11 @@ def start_test(request, pk):
 
 @login_required
 def take_test(request, pk):
-    """Прохождение теста: отображение вопросов и обработка ответов."""
     test_obj = get_object_or_404(Test, pk=pk)
     result = TestResult.objects.filter(user=request.user, test=test_obj).first()
 
     if not result or not result.access_granted:
-        return redirect('enter_key') 
+        return redirect('enter_key')
 
     questions = test_obj.questions.all()
 
@@ -144,7 +136,6 @@ def take_test(request, pk):
 
 @login_required
 def test_result(request, pk):
-    """Страница результата теста."""
     test_obj = get_object_or_404(Test, pk=pk)
     result = TestResult.objects.filter(user=request.user, test=test_obj).first()
 
@@ -156,9 +147,9 @@ def test_result(request, pk):
         'result': result,
     })
 
+
 @login_required
 def test_review(request, pk):
-    """Просмотр теста после прохождения: правильные ответы и ответы пользователя."""
     test = get_object_or_404(Test, id=pk)
     result = get_object_or_404(TestResult, test=test, user=request.user)
 
